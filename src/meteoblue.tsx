@@ -3,11 +3,12 @@ import {
   ActionPanel,
   Action,
   Icon,
-  Detail,
   openExtensionPreferences,
 } from "@raycast/api";
 import { useWeather } from "./hooks";
 import { useFavorites } from "./favorites";
+import { DayHourlyForecast } from "./DayHourlyForecast";
+import { HourDetail } from "./HourDetail";
 import {
   formatTemperature,
   formatTemperatureRange,
@@ -142,7 +143,14 @@ export default function Command() {
     const basicData = weatherData.basic?.data_1h || [];
     const dailyData =
       weatherData.basicDay?.data_day || weatherData.basic?.data_day || [];
-    const currentData = basicData[0]; // First item is current/next hour
+
+    // Forward-looking: start from current hour (rounded down)
+    const now = new Date();
+    const currentHourStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()).getTime();
+    const startIndex = basicData.findIndex((item) => new Date(item.time).getTime() >= currentHourStart);
+    const hourlyData = startIndex >= 0 ? basicData.slice(startIndex, startIndex + 24) : basicData.slice(0, 24);
+    const currentData = hourlyData[0];
+
     const locationName = selectedLocation
       ? `${selectedLocation.name}, ${selectedLocation.country}`
       : "Unknown Location";
@@ -306,11 +314,11 @@ export default function Command() {
         <List.Section
           title="Hourly Forecast"
           subtitle={
-            basicData.length > 0 ? `${basicData.length} hours` : "No data"
+            hourlyData.length > 0 ? `${hourlyData.length} hours` : "No data"
           }
         >
-          {basicData.length > 0 ? (
-            basicData.slice(0, 24).map((item, index) => {
+          {hourlyData.length > 0 ? (
+            hourlyData.map((item, index) => {
               const date = new Date(item.time);
               const timeStr = date.toLocaleTimeString([], {
                 hour: "2-digit",
@@ -336,8 +344,15 @@ export default function Command() {
                         title="View Details"
                         icon={Icon.Info}
                         target={
-                          <Detail
-                            markdown={`# Weather Details\n\n**Time:** ${new Date(item.time).toLocaleString()}\n\n**Temperature:** ${formatTemperature(item.temperature, weatherData.basic?.units?.temperature || "°C")}\n**Feels Like:** ${formatTemperature(item.felttemperature, weatherData.basic?.units?.felttemperature || weatherData.basic?.units?.temperature || "°C")}\n**Precipitation:** ${formatPrecipitation(item.precipitation, weatherData.basic?.units?.precipitation || "mm")}\n**Wind Speed:** ${formatWindSpeed(item.windspeed, weatherData.basic?.units?.windspeed || "km/h")}\n**Wind Direction:** ${item.winddirection !== undefined ? `${Math.round(item.winddirection)}°` : "N/A"}\n**Humidity:** ${item.relativehumidity ? `${Math.round(item.relativehumidity)}%` : "N/A"}\n**Pressure:** ${item.sealevelpressure ? `${Math.round(item.sealevelpressure)} ${weatherData.basic?.units?.sealevelpressure || "hPa"}` : "N/A"}\n**UV Index:** ${item.uvindex !== undefined ? Math.round(item.uvindex).toString() : "N/A"}\n**Predictability:** ${item.predictability !== undefined ? `${Math.round(item.predictability)}%` : "N/A"}`}
+                          <HourDetail
+                            item={item}
+                            units={{
+                              temperature: weatherData.basic?.units?.temperature || "°C",
+                              felttemperature: weatherData.basic?.units?.felttemperature || weatherData.basic?.units?.temperature || "°C",
+                              precipitation: weatherData.basic?.units?.precipitation || "mm",
+                              windspeed: weatherData.basic?.units?.windspeed || "km/h",
+                              sealevelpressure: weatherData.basic?.units?.sealevelpressure || "hPa",
+                            }}
                           />
                         }
                       />
@@ -361,7 +376,11 @@ export default function Command() {
           }
         >
           {dailyData.length > 0 ? (
-            dailyData.slice(0, 7).map((item) => {
+            dailyData.filter((item) => {
+              const itemDate = new Date(item.time);
+              const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+              return itemDate >= todayStart;
+            }).slice(0, 7).map((item) => {
               const date = new Date(item.time);
               const dateStr = date.toLocaleDateString([], {
                 weekday: "long",
@@ -391,11 +410,20 @@ export default function Command() {
                   actions={
                     <ActionPanel>
                       <Action.Push
-                        title="View Details"
-                        icon={Icon.Info}
+                        title="View Hourly Breakdown"
+                        icon={Icon.Clock}
                         target={
-                          <Detail
-                            markdown={`# Daily Forecast\n\n**Date:** ${date.toLocaleDateString([], { weekday: "long", year: "numeric", month: "long", day: "numeric" })}\n\n**Temperature:** ${formatTemperatureRange(item.temperature, item.temperature_min, item.temperature_max, tempUnit)}\n**Feels Like:** ${formatTemperature(item.felttemperature, weatherData.basicDay?.units?.felttemperature || weatherData.basic?.units?.felttemperature || tempUnit)}\n**Precipitation:** ${formatPrecipitation(item.precipitation, precipUnit)}\n**Wind Speed:** ${formatWindSpeedDisplay(item.windspeed, item.windspeed_max, item.windspeed_mean, windUnit)}\n**Wind Direction:** ${item.winddirection !== undefined ? `${Math.round(item.winddirection)}°` : "N/A"}\n**Humidity:** ${item.relativehumidity ? `${Math.round(item.relativehumidity)}%` : "N/A"}\n**Pressure:** ${item.sealevelpressure ? `${Math.round(item.sealevelpressure)} ${weatherData.basicDay?.units?.sealevelpressure || weatherData.basic?.units?.sealevelpressure || "hPa"}` : "N/A"}\n**UV Index:** ${item.uvindex !== undefined ? Math.round(item.uvindex).toString() : "N/A"}\n**Predictability:** ${item.predictability !== undefined ? `${Math.round(item.predictability)}%` : "N/A"}`}
+                          <DayHourlyForecast
+                            date={date}
+                            hourlyData={basicData}
+                            units={{
+                              temperature: tempUnit,
+                              felttemperature: weatherData.basicDay?.units?.felttemperature || weatherData.basic?.units?.felttemperature || tempUnit,
+                              precipitation: precipUnit,
+                              windspeed: windUnit,
+                              sealevelpressure: weatherData.basicDay?.units?.sealevelpressure || weatherData.basic?.units?.sealevelpressure || "hPa",
+                            }}
+                            locationName={locationName}
                           />
                         }
                       />

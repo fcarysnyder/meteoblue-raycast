@@ -3,11 +3,11 @@ import {
   ActionPanel,
   Action,
   Icon,
-  Detail,
   openExtensionPreferences,
 } from "@raycast/api";
 import { useWeather } from "./hooks";
 import { useFavorites } from "./favorites";
+import { HourDetail } from "./HourDetail";
 import {
   formatTemperature,
   formatWindSpeed,
@@ -187,8 +187,15 @@ export default function Command() {
                         title="View Details"
                         icon={Icon.Info}
                         target={
-                          <Detail
-                            markdown={`# Weather Details\n\n**Time:** ${new Date(item.time).toLocaleString()}\n\n**Temperature:** ${formatTemperature(item.temperature, weatherData.basic?.units?.temperature || "°C")}\n**Feels Like:** ${formatTemperature(item.felttemperature, weatherData.basic?.units?.felttemperature || weatherData.basic?.units?.temperature || "°C")}\n**Precipitation:** ${formatPrecipitation(item.precipitation, weatherData.basic?.units?.precipitation || "mm")}\n**Wind Speed:** ${formatWindSpeed(item.windspeed, weatherData.basic?.units?.windspeed || "km/h")}\n**Wind Direction:** ${item.winddirection ? `${Math.round(item.winddirection)}°` : "N/A"}\n**Humidity:** ${item.relativehumidity ? `${Math.round(item.relativehumidity)}%` : "N/A"}\n**Pressure:** ${item.sealevelpressure ? `${Math.round(item.sealevelpressure)} ${weatherData.basic?.units?.sealevelpressure || "hPa"}` : "N/A"}\n**UV Index:** ${item.uvindex !== undefined ? Math.round(item.uvindex).toString() : "N/A"}\n**Predictability:** ${item.predictability !== undefined ? `${Math.round(item.predictability)}%` : "N/A"}`}
+                          <HourDetail
+                            item={item}
+                            units={{
+                              temperature: weatherData.basic?.units?.temperature || "°C",
+                              felttemperature: weatherData.basic?.units?.felttemperature || weatherData.basic?.units?.temperature || "°C",
+                              precipitation: weatherData.basic?.units?.precipitation || "mm",
+                              windspeed: weatherData.basic?.units?.windspeed || "km/h",
+                              sealevelpressure: weatherData.basic?.units?.sealevelpressure || "hPa",
+                            }}
                           />
                         }
                       />

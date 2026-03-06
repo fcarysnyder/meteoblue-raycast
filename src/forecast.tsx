@@ -3,13 +3,12 @@ import {
   ActionPanel,
   Action,
   Icon,
-  Detail,
   openExtensionPreferences,
 } from "@raycast/api";
 import { useWeather } from "./hooks";
 import { useFavorites } from "./favorites";
+import { DayHourlyForecast } from "./DayHourlyForecast";
 import {
-  formatTemperature,
   formatTemperatureRange,
   formatWindSpeedDisplay,
   formatPrecipitation,
@@ -133,10 +132,15 @@ export default function Command() {
 
   // Show weather data
   if (weatherData) {
+    const basicData = weatherData.basic?.data_1h || [];
     const dailyData =
       weatherData.basicDay?.data_day || weatherData.basic?.data_day || [];
-    // 5-day forecast
-    const forecastData = dailyData.slice(0, 5);
+    // 5-day forecast, starting from today
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const forecastData = dailyData
+      .filter((item) => new Date(item.time) >= todayStart)
+      .slice(0, 5);
 
     const locationName = selectedLocation
       ? `${selectedLocation.name}, ${selectedLocation.country}`
@@ -186,11 +190,20 @@ export default function Command() {
                   actions={
                     <ActionPanel>
                       <Action.Push
-                        title="View Details"
-                        icon={Icon.Info}
+                        title="View Hourly Breakdown"
+                        icon={Icon.Clock}
                         target={
-                          <Detail
-                            markdown={`# Daily Forecast\n\n**Date:** ${date.toLocaleDateString([], { weekday: "long", year: "numeric", month: "long", day: "numeric" })}\n\n**Temperature:** ${formatTemperatureRange(item.temperature, item.temperature_min, item.temperature_max, tempUnit)}\n**Feels Like:** ${formatTemperature(item.felttemperature, weatherData.basicDay?.units?.felttemperature || weatherData.basic?.units?.felttemperature || tempUnit)}\n**Precipitation:** ${formatPrecipitation(item.precipitation, precipUnit)}\n**Wind Speed:** ${formatWindSpeedDisplay(item.windspeed, item.windspeed_max, item.windspeed_mean, windUnit)}\n**Wind Direction:** ${item.winddirection !== undefined ? `${Math.round(item.winddirection)}°` : "N/A"}\n**Humidity:** ${item.relativehumidity ? `${Math.round(item.relativehumidity)}%` : "N/A"}\n**Pressure:** ${item.sealevelpressure ? `${Math.round(item.sealevelpressure)} ${weatherData.basicDay?.units?.sealevelpressure || weatherData.basic?.units?.sealevelpressure || "hPa"}` : "N/A"}\n**UV Index:** ${item.uvindex !== undefined ? Math.round(item.uvindex).toString() : "N/A"}\n**Predictability:** ${item.predictability !== undefined ? `${Math.round(item.predictability)}%` : "N/A"}`}
+                          <DayHourlyForecast
+                            date={date}
+                            hourlyData={basicData}
+                            units={{
+                              temperature: tempUnit,
+                              felttemperature: weatherData.basicDay?.units?.felttemperature || weatherData.basic?.units?.felttemperature || tempUnit,
+                              precipitation: precipUnit,
+                              windspeed: windUnit,
+                              sealevelpressure: weatherData.basicDay?.units?.sealevelpressure || weatherData.basic?.units?.sealevelpressure || "hPa",
+                            }}
+                            locationName={locationName}
                           />
                         }
                       />

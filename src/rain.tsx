@@ -223,14 +223,8 @@ export default function Command() {
     return (
       <Detail
         markdown={`# ${status.text}
-        
+
 ${status.blurb}
-
----
-
-**Location:** ${locationName}
-**Rain Chance (Est):** ${maxRainChance}%
-**Total Rain (Next 12h):** ${next12Hours.reduce((acc, curr) => acc + (curr.precipitation || 0), 0).toFixed(1)} ${weatherData.basic?.units?.precipitation || "mm"}
 `}
         actions={
           <ActionPanel>
@@ -271,6 +265,10 @@ ${status.blurb}
             <Detail.Metadata.Label
               title="Rain Chance"
               text={`${maxRainChance}%`}
+            />
+            <Detail.Metadata.Label
+              title="Total Rain (12h)"
+              text={`${next12Hours.reduce((acc, curr) => acc + (curr.precipitation || 0), 0).toFixed(1)} ${weatherData.basic?.units?.precipitation || "mm"}`}
             />
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label title="Location" text={locationName} />

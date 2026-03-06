@@ -105,8 +105,11 @@ export default function Command() {
   // Show weather data
   if (weatherData) {
     const basicData = weatherData.basic?.data_1h || [];
-    // Filter for next 24 hours starting from now
-    const hourlyData = basicData.slice(0, 24);
+    // Filter for forward-looking hours: start from the current hour (rounded down)
+    const now = new Date();
+    const currentHourStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()).getTime();
+    const startIndex = basicData.findIndex((item) => new Date(item.time).getTime() >= currentHourStart);
+    const hourlyData = startIndex >= 0 ? basicData.slice(startIndex, startIndex + 24) : basicData.slice(0, 24);
 
     const locationName = selectedLocation
       ? `${selectedLocation.name}, ${selectedLocation.country}`

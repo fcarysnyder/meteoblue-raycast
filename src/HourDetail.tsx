@@ -43,12 +43,18 @@ export function HourDetail({ item, units }: HourDetailProps) {
         />
         <List.Item
           title="Feels Like"
-          subtitle={formatTemperature(item.felttemperature, units.felttemperature)}
+          subtitle={formatTemperature(
+            item.felttemperature,
+            units.felttemperature,
+          )}
           icon={Icon.Temperature}
         />
         <List.Item
           title="Precipitation"
-          subtitle={formatPrecipitation(item.precipitation, units.precipitation)}
+          subtitle={formatPrecipitation(
+            item.precipitation,
+            units.precipitation,
+          )}
           icon={Icon.CloudRain}
         />
         <List.Item

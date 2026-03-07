@@ -34,7 +34,9 @@ export default function Command() {
     isLocationFavorite,
   } = useFavorites();
 
-  const selectLocation = async (location: import("./types").LocationSearchResult) => {
+  const selectLocation = async (
+    location: import("./types").LocationSearchResult,
+  ) => {
     await handleSetLastUsed(location);
     await handleSelectLocation(location);
   };
@@ -233,8 +235,8 @@ ${status.blurb}
               icon={Icon.MagnifyingGlass}
               onAction={() => setSearchText("")} // Hack to go back to search
             />
-            {selectedLocation && (
-              isLocationFavorite(selectedLocation.id) ? (
+            {selectedLocation &&
+              (isLocationFavorite(selectedLocation.id) ? (
                 <Action
                   title="Remove from Favorites"
                   icon={Icon.StarDisabled}
@@ -246,8 +248,7 @@ ${status.blurb}
                   icon={Icon.Star}
                   onAction={() => handleAddFavorite(selectedLocation)}
                 />
-              )
-            )}
+              ))}
             <Action
               title="Configure Extension"
               icon={Icon.Gear}
@@ -306,7 +307,9 @@ ${status.blurb}
                       <Action
                         title="Remove from Favorites"
                         icon={Icon.StarDisabled}
-                        onAction={() => handleRemoveFavorite(lastUsedLocation.id)}
+                        onAction={() =>
+                          handleRemoveFavorite(lastUsedLocation.id)
+                        }
                       />
                     ) : (
                       <Action

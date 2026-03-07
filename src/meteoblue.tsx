@@ -47,7 +47,9 @@ export default function Command() {
     isLocationFavorite,
   } = useFavorites();
 
-  const selectLocation = async (location: import("./types").LocationSearchResult) => {
+  const selectLocation = async (
+    location: import("./types").LocationSearchResult,
+  ) => {
     await handleSetLastUsed(location);
     await handleSelectLocation(location);
   };
@@ -146,9 +148,19 @@ export default function Command() {
 
     // Forward-looking: start from current hour (rounded down)
     const now = new Date();
-    const currentHourStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()).getTime();
-    const startIndex = basicData.findIndex((item) => new Date(item.time).getTime() >= currentHourStart);
-    const hourlyData = startIndex >= 0 ? basicData.slice(startIndex, startIndex + 24) : basicData.slice(0, 24);
+    const currentHourStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      now.getHours(),
+    ).getTime();
+    const startIndex = basicData.findIndex(
+      (item) => new Date(item.time).getTime() >= currentHourStart,
+    );
+    const hourlyData =
+      startIndex >= 0
+        ? basicData.slice(startIndex, startIndex + 24)
+        : basicData.slice(0, 24);
     const currentData = hourlyData[0];
 
     const locationName = selectedLocation
@@ -209,8 +221,8 @@ export default function Command() {
                     }
                   }}
                 />
-                {selectedLocation && (
-                  isLocationFavorite(selectedLocation.id) ? (
+                {selectedLocation &&
+                  (isLocationFavorite(selectedLocation.id) ? (
                     <Action
                       title="Remove from Favorites"
                       icon={Icon.StarDisabled}
@@ -222,8 +234,7 @@ export default function Command() {
                       icon={Icon.Star}
                       onAction={() => handleAddFavorite(selectedLocation)}
                     />
-                  )
-                )}
+                  ))}
                 <Action
                   title="Configure Extension"
                   icon={Icon.Gear}
@@ -347,11 +358,19 @@ export default function Command() {
                           <HourDetail
                             item={item}
                             units={{
-                              temperature: weatherData.basic?.units?.temperature || "°C",
-                              felttemperature: weatherData.basic?.units?.felttemperature || weatherData.basic?.units?.temperature || "°C",
-                              precipitation: weatherData.basic?.units?.precipitation || "mm",
-                              windspeed: weatherData.basic?.units?.windspeed || "km/h",
-                              sealevelpressure: weatherData.basic?.units?.sealevelpressure || "hPa",
+                              temperature:
+                                weatherData.basic?.units?.temperature || "°C",
+                              felttemperature:
+                                weatherData.basic?.units?.felttemperature ||
+                                weatherData.basic?.units?.temperature ||
+                                "°C",
+                              precipitation:
+                                weatherData.basic?.units?.precipitation || "mm",
+                              windspeed:
+                                weatherData.basic?.units?.windspeed || "km/h",
+                              sealevelpressure:
+                                weatherData.basic?.units?.sealevelpressure ||
+                                "hPa",
                             }}
                           />
                         }
@@ -376,62 +395,77 @@ export default function Command() {
           }
         >
           {dailyData.length > 0 ? (
-            dailyData.filter((item) => {
-              const itemDate = new Date(item.time);
-              const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-              return itemDate >= todayStart;
-            }).slice(0, 7).map((item) => {
-              const date = new Date(item.time);
-              const dateStr = date.toLocaleDateString([], {
-                weekday: "long",
-                month: "short",
-                day: "numeric",
-              });
+            dailyData
+              .filter((item) => {
+                const itemDate = new Date(item.time);
+                const todayStart = new Date(
+                  now.getFullYear(),
+                  now.getMonth(),
+                  now.getDate(),
+                );
+                return itemDate >= todayStart;
+              })
+              .slice(0, 7)
+              .map((item) => {
+                const date = new Date(item.time);
+                const dateStr = date.toLocaleDateString([], {
+                  weekday: "long",
+                  month: "short",
+                  day: "numeric",
+                });
 
-              const tempUnit =
-                weatherData.basicDay?.units?.temperature ||
-                weatherData.basic?.units?.temperature ||
-                "°C";
-              const precipUnit =
-                weatherData.basicDay?.units?.precipitation ||
-                weatherData.basic?.units?.precipitation ||
-                "mm";
-              const windUnit =
-                weatherData.basicDay?.units?.windspeed ||
-                weatherData.basic?.units?.windspeed ||
-                "km/h";
+                const tempUnit =
+                  weatherData.basicDay?.units?.temperature ||
+                  weatherData.basic?.units?.temperature ||
+                  "°C";
+                const precipUnit =
+                  weatherData.basicDay?.units?.precipitation ||
+                  weatherData.basic?.units?.precipitation ||
+                  "mm";
+                const windUnit =
+                  weatherData.basicDay?.units?.windspeed ||
+                  weatherData.basic?.units?.windspeed ||
+                  "km/h";
 
-              return (
-                <List.Item
-                  key={item.time}
-                  title={dateStr}
-                  subtitle={`${formatTemperatureRange(item.temperature, item.temperature_min, item.temperature_max, tempUnit)} • ${formatPrecipitation(item.precipitation, precipUnit)} • ${formatWindSpeedDisplay(item.windspeed, item.windspeed_max, item.windspeed_mean, windUnit)}`}
-                  icon={getWeatherIcon(item.pictocode)}
-                  actions={
-                    <ActionPanel>
-                      <Action.Push
-                        title="View Hourly Breakdown"
-                        icon={Icon.Clock}
-                        target={
-                          <DayHourlyForecast
-                            date={date}
-                            hourlyData={basicData}
-                            units={{
-                              temperature: tempUnit,
-                              felttemperature: weatherData.basicDay?.units?.felttemperature || weatherData.basic?.units?.felttemperature || tempUnit,
-                              precipitation: precipUnit,
-                              windspeed: windUnit,
-                              sealevelpressure: weatherData.basicDay?.units?.sealevelpressure || weatherData.basic?.units?.sealevelpressure || "hPa",
-                            }}
-                            locationName={locationName}
-                          />
-                        }
-                      />
-                    </ActionPanel>
-                  }
-                />
-              );
-            })
+                return (
+                  <List.Item
+                    key={item.time}
+                    title={dateStr}
+                    subtitle={`${formatTemperatureRange(item.temperature, item.temperature_min, item.temperature_max, tempUnit)} • ${formatPrecipitation(item.precipitation, precipUnit)} • ${formatWindSpeedDisplay(item.windspeed, item.windspeed_max, item.windspeed_mean, windUnit)}`}
+                    icon={getWeatherIcon(item.pictocode)}
+                    actions={
+                      <ActionPanel>
+                        <Action.Push
+                          title="View Hourly Breakdown"
+                          icon={Icon.Clock}
+                          target={
+                            <DayHourlyForecast
+                              date={date}
+                              hourlyData={basicData}
+                              units={{
+                                temperature: tempUnit,
+                                felttemperature:
+                                  weatherData.basicDay?.units
+                                    ?.felttemperature ||
+                                  weatherData.basic?.units?.felttemperature ||
+                                  tempUnit,
+                                precipitation: precipUnit,
+                                windspeed: windUnit,
+                                sealevelpressure:
+                                  weatherData.basicDay?.units
+                                    ?.sealevelpressure ||
+                                  weatherData.basic?.units?.sealevelpressure ||
+                                  "hPa",
+                              }}
+                              locationName={locationName}
+                            />
+                          }
+                        />
+                      </ActionPanel>
+                    }
+                  />
+                );
+              })
           ) : (
             <List.Item
               title="No daily forecast data available"
@@ -471,7 +505,9 @@ export default function Command() {
                       <Action
                         title="Remove from Favorites"
                         icon={Icon.StarDisabled}
-                        onAction={() => handleRemoveFavorite(lastUsedLocation.id)}
+                        onAction={() =>
+                          handleRemoveFavorite(lastUsedLocation.id)
+                        }
                       />
                     ) : (
                       <Action

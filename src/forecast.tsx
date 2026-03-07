@@ -39,7 +39,9 @@ export default function Command() {
     isLocationFavorite,
   } = useFavorites();
 
-  const selectLocation = async (location: import("./types").LocationSearchResult) => {
+  const selectLocation = async (
+    location: import("./types").LocationSearchResult,
+  ) => {
     await handleSetLastUsed(location);
     await handleSelectLocation(location);
   };
@@ -137,7 +139,11 @@ export default function Command() {
       weatherData.basicDay?.data_day || weatherData.basic?.data_day || [];
     // 5-day forecast, starting from today
     const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
     const forecastData = dailyData
       .filter((item) => new Date(item.time) >= todayStart)
       .slice(0, 5);
@@ -198,21 +204,29 @@ export default function Command() {
                             hourlyData={basicData}
                             units={{
                               temperature: tempUnit,
-                              felttemperature: weatherData.basicDay?.units?.felttemperature || weatherData.basic?.units?.felttemperature || tempUnit,
+                              felttemperature:
+                                weatherData.basicDay?.units?.felttemperature ||
+                                weatherData.basic?.units?.felttemperature ||
+                                tempUnit,
                               precipitation: precipUnit,
                               windspeed: windUnit,
-                              sealevelpressure: weatherData.basicDay?.units?.sealevelpressure || weatherData.basic?.units?.sealevelpressure || "hPa",
+                              sealevelpressure:
+                                weatherData.basicDay?.units?.sealevelpressure ||
+                                weatherData.basic?.units?.sealevelpressure ||
+                                "hPa",
                             }}
                             locationName={locationName}
                           />
                         }
                       />
-                      {selectedLocation && (
-                        isLocationFavorite(selectedLocation.id) ? (
+                      {selectedLocation &&
+                        (isLocationFavorite(selectedLocation.id) ? (
                           <Action
                             title="Remove from Favorites"
                             icon={Icon.StarDisabled}
-                            onAction={() => handleRemoveFavorite(selectedLocation.id)}
+                            onAction={() =>
+                              handleRemoveFavorite(selectedLocation.id)
+                            }
                           />
                         ) : (
                           <Action
@@ -220,8 +234,7 @@ export default function Command() {
                             icon={Icon.Star}
                             onAction={() => handleAddFavorite(selectedLocation)}
                           />
-                        )
-                      )}
+                        ))}
                       <Action
                         title="Configure Extension"
                         icon={Icon.Gear}
@@ -271,7 +284,9 @@ export default function Command() {
                       <Action
                         title="Remove from Favorites"
                         icon={Icon.StarDisabled}
-                        onAction={() => handleRemoveFavorite(lastUsedLocation.id)}
+                        onAction={() =>
+                          handleRemoveFavorite(lastUsedLocation.id)
+                        }
                       />
                     ) : (
                       <Action

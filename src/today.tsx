@@ -39,7 +39,9 @@ export default function Command() {
     isLocationFavorite,
   } = useFavorites();
 
-  const selectLocation = async (location: import("./types").LocationSearchResult) => {
+  const selectLocation = async (
+    location: import("./types").LocationSearchResult,
+  ) => {
     await handleSetLastUsed(location);
     await handleSelectLocation(location);
   };
@@ -135,9 +137,19 @@ export default function Command() {
     const basicData = weatherData.basic?.data_1h || [];
     // Filter for forward-looking hours: start from the current hour (rounded down)
     const now = new Date();
-    const currentHourStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()).getTime();
-    const startIndex = basicData.findIndex((item) => new Date(item.time).getTime() >= currentHourStart);
-    const hourlyData = startIndex >= 0 ? basicData.slice(startIndex, startIndex + 24) : basicData.slice(0, 24);
+    const currentHourStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      now.getHours(),
+    ).getTime();
+    const startIndex = basicData.findIndex(
+      (item) => new Date(item.time).getTime() >= currentHourStart,
+    );
+    const hourlyData =
+      startIndex >= 0
+        ? basicData.slice(startIndex, startIndex + 24)
+        : basicData.slice(0, 24);
 
     const locationName = selectedLocation
       ? `${selectedLocation.name}, ${selectedLocation.country}`
@@ -190,21 +202,31 @@ export default function Command() {
                           <HourDetail
                             item={item}
                             units={{
-                              temperature: weatherData.basic?.units?.temperature || "°C",
-                              felttemperature: weatherData.basic?.units?.felttemperature || weatherData.basic?.units?.temperature || "°C",
-                              precipitation: weatherData.basic?.units?.precipitation || "mm",
-                              windspeed: weatherData.basic?.units?.windspeed || "km/h",
-                              sealevelpressure: weatherData.basic?.units?.sealevelpressure || "hPa",
+                              temperature:
+                                weatherData.basic?.units?.temperature || "°C",
+                              felttemperature:
+                                weatherData.basic?.units?.felttemperature ||
+                                weatherData.basic?.units?.temperature ||
+                                "°C",
+                              precipitation:
+                                weatherData.basic?.units?.precipitation || "mm",
+                              windspeed:
+                                weatherData.basic?.units?.windspeed || "km/h",
+                              sealevelpressure:
+                                weatherData.basic?.units?.sealevelpressure ||
+                                "hPa",
                             }}
                           />
                         }
                       />
-                      {selectedLocation && (
-                        isLocationFavorite(selectedLocation.id) ? (
+                      {selectedLocation &&
+                        (isLocationFavorite(selectedLocation.id) ? (
                           <Action
                             title="Remove from Favorites"
                             icon={Icon.StarDisabled}
-                            onAction={() => handleRemoveFavorite(selectedLocation.id)}
+                            onAction={() =>
+                              handleRemoveFavorite(selectedLocation.id)
+                            }
                           />
                         ) : (
                           <Action
@@ -212,8 +234,7 @@ export default function Command() {
                             icon={Icon.Star}
                             onAction={() => handleAddFavorite(selectedLocation)}
                           />
-                        )
-                      )}
+                        ))}
                       <Action
                         title="Configure Extension"
                         icon={Icon.Gear}
@@ -263,7 +284,9 @@ export default function Command() {
                       <Action
                         title="Remove from Favorites"
                         icon={Icon.StarDisabled}
-                        onAction={() => handleRemoveFavorite(lastUsedLocation.id)}
+                        onAction={() =>
+                          handleRemoveFavorite(lastUsedLocation.id)
+                        }
                       />
                     ) : (
                       <Action

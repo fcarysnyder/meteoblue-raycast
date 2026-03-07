@@ -55,7 +55,8 @@ export async function saveLastUsedLocation(location: LocationSearchResult) {
 
 export function useFavorites() {
   const [favorites, setFavorites] = useState<LocationSearchResult[]>([]);
-  const [lastUsedLocation, setLastUsedLocation] = useState<LocationSearchResult | null>(null);
+  const [lastUsedLocation, setLastUsedLocation] =
+    useState<LocationSearchResult | null>(null);
   const [isLoadingFavorites, setIsLoadingFavorites] = useState(true);
 
   useEffect(() => {
@@ -70,20 +71,26 @@ export function useFavorites() {
     })();
   }, []);
 
-  const handleAddFavorite = useCallback(async (location: LocationSearchResult) => {
-    const updated = await addFavorite(location);
-    setFavorites(updated);
-  }, []);
+  const handleAddFavorite = useCallback(
+    async (location: LocationSearchResult) => {
+      const updated = await addFavorite(location);
+      setFavorites(updated);
+    },
+    [],
+  );
 
   const handleRemoveFavorite = useCallback(async (locationId: string) => {
     const updated = await removeFavorite(locationId);
     setFavorites(updated);
   }, []);
 
-  const handleSetLastUsed = useCallback(async (location: LocationSearchResult) => {
-    await saveLastUsedLocation(location);
-    setLastUsedLocation(location);
-  }, []);
+  const handleSetLastUsed = useCallback(
+    async (location: LocationSearchResult) => {
+      await saveLastUsedLocation(location);
+      setLastUsedLocation(location);
+    },
+    [],
+  );
 
   const isLocationFavorite = useCallback(
     (locationId: string) => favorites.some((f) => f.id === locationId),
